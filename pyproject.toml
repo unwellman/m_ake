@@ -1,0 +1,12 @@
+[project]
+name = "m_ake"
+version = "0.0.0"
+dependencies = [
+	"pygame-ce",
+]
+
+[build-system]
+requires = [
+	"setuptools",
+]
+
