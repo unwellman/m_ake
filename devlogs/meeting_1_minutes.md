@@ -2,7 +2,7 @@
 2025-07-21
 
 ### Project Organization
-- **Game design document**: Google Docs
+- **Game design document**: [Google Docs](https://docs.google.com/document/d/18kLg6gHg88YxPXPglxHX-Po1CPbw6ecDhX11SEJKXIk/edit?tab=t.0)
     - Author document by committee
 - **Version control**: GitHub repo
     - Catch non-programmers up to speed on Windows PowerShell
@@ -52,7 +52,7 @@ Noah proposes a practice project before entering Brackeys Game Jam 2025.2
     - Can use social media as a falling-asleep minigame
 
 ### Creation tools
-- Pixel art: (Aseprite)[https://www.aseprite.org/]
+- Pixel art: [Aseprite](https://www.aseprite.org/)
 - Music/sound: FL Studio
 - Development environment:
     - Gamemaker free version
