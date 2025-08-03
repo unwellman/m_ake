@@ -3,6 +3,7 @@ name = "m_ake"
 version = "0.0.0"
 dependencies = [
 	"pygame-ce",
+	"pytest",
 ]
 
 [build-system]

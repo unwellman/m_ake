@@ -1,3 +1,7 @@
+
+# Just in case
+.venv
+
 *__pycache__
 *egg-info
 
