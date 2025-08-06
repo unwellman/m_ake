@@ -30,7 +30,7 @@ class Event_handler (object):
 
         Parameters:
             event: pygame event type
-            func: action accepting 
+            func: function taking dict
         """
         if event in self.actions.keys():
             mk.logger.info(f"Bound event {event}: {self.actions[event]}"\

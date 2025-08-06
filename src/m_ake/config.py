@@ -1,5 +1,9 @@
 class Config (object):
     def __init__ (self, fp):
+        self.fp = fp
+        self.__load(fp)
+
+    def __load (self, fp):
         with open(fp, 'r') as cfg:
             lines = cfg.readlines()
 
@@ -12,6 +16,9 @@ class Config (object):
             except IndexError:
                 v = None
             self.__dict__[k] = v
+
+    def force_reload (self):
+        self.__load(self.fp)
 
     def __validate (self, item):
         cast = [int, float]
