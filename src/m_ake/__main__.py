@@ -1,14 +1,18 @@
-import pygame
+import pygame as pg
 import m_ake as mk
 
 def main ():
-    window = mk.Window()
-    should_close = mk.State_variable(False)
+    window = mk.window.Window()
 
-    while not:
-        pass
+    should_close = mk.event.State_bool(False)
 
-    pygame.quit()
+    handler = mk.event.Event_handler()
+    handler.bind(pg.QUIT, should_close(True))
+
+    while not should_close:
+        handler()
+
+    pg.quit()
 
 if __name__ == "__main__":
     main()

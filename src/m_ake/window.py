@@ -1,11 +1,10 @@
 import pygame as pg
-from m_ake import config
-
+import m_ake as mk
 
 class Window:
     def __init__ (self, *args, **kwargs):
         params = {
-            'size': (config.width, config.height),
+            'size': (mk.config.width, mk.config.height),
         }
-        self.screen = pg.display.set_mode(**params)
+        self.surface = pg.display.set_mode(**params)
 

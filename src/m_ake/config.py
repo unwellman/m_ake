@@ -1,4 +1,3 @@
-
 class Config (object):
     def __init__ (self, fp):
         with open(fp, 'r') as cfg:
