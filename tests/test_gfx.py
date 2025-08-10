@@ -1,40 +1,74 @@
 import m_ake as mk
 import pygame as pg
 
+fp_w = "res/programmer_assets/white_border.png"
+fp_b = "res/programmer_assets/blue_border.png"
+
 def test_sprite_init ():
     spt = mk.gfx.Sprite()
 
 def test_sprite_load ():
-    border_fp = "res/programmer_assets/white_border.png"
     spt = mk.gfx.Sprite()
-    spt.load_image(border_fp)
+    spt.load_image(fp_w)
 
 def test_sprite_set ():
-    fp_w = "res/programmer_assets/white_border.png"
     spt = mk.gfx.Sprite()
     spt.load_image(fp_w, "white")
     spt.set_frame("white")
 
 def test_sprite_get ():
-    fp_w = "res/programmer_assets/white_border.png"
-    fp_b = "res/programmer_assets/blue_border.png"
     spt = mk.gfx.Sprite()
     spt.load_image(fp_w, "white")
     spt.load_image(fp_b, "blue")
     spt.set_frame("blue")
-    col = spt.get_surf().get_at((0, 0))
+    surf, *_ = spt.get_blit_args()
+    col = surf.get_at((0, 0))
     assert col == pg.Color(48, 96, 130)
     spt.set_frame("white")
-    col = spt.get_surf().get_at((0, 0))
+    surf, *_ = spt.get_blit_args()
+    col = surf.get_at((0, 0))
     assert col == pg.Color(255, 255, 255)
 
 
 def test_screen_init ():
-    pass
+    scn = mk.gfx.Screen((320, 180))
+
+def test_screen_clear ():
+    scn = mk.gfx.Screen((320, 180))
+    scn.clear_color = pg.Color(48, 96, 130)
+    scn.draw()
+    assert scn.get_at((0, 0)) == pg.Color(48, 96, 130)
 
 def test_screen_register ():
-    pass
+    scn = mk.gfx.Screen((320, 180))
+    spt_1 = mk.gfx.Sprite()
+    scn.register(spt_1)
+
+def test_screen_draw ():
+    scn = mk.gfx.Screen((320, 180))
+    spt_1 = mk.gfx.Sprite()
+    spt_1.load_image(fp_w, "white", set_frame=True)
+    scn.register(spt_1)
+    scn.draw()
 
 def test_screen_upscale ():
-    pass
+    pg.init()
+    disp = pg.Surface((1280, 720))
+    scn = mk.gfx.Screen((320, 180))
+    scn.draw()
+    scn.upscale(disp)
+
+def test_gfx_integration_1 ():
+    scn = mk.gfx.Screen((320, 180))
+    disp = pg.display.set_mode((1280, 720))
+    spt_1 = mk.gfx.Sprite()
+    spt_2 = mk.gfx.Sprite()
+    spt_1.load_image(fp_w, "white", set_frame=True)
+    spt_2.load_image(fp_b, "blue", set_frame=True)
+    scn.register(spt_1, end=False)
+    scn.register(spt_2)
+    scn.draw()
+    scn.upscale(disp)
+    pg.display.flip()
+
 
