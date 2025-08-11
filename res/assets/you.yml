@@ -1,0 +1,17 @@
+metadata:
+  name: you
+  width: 64
+  height: 64
+
+animations:
+  - id: idle
+    frames: 1
+    frame_time: 2
+    x_offsets: [0]
+    y_offsets: [0]
+  - id: walk_S
+    frames: 4
+    frame_time: 3
+    x_offsets: [  0,  64, 128, 192]
+    y_offsets: [  0,   0,   0,   0]
+

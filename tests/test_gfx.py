@@ -3,6 +3,8 @@ import pygame as pg
 
 fp_w = "res/programmer_assets/white_border.png"
 fp_b = "res/programmer_assets/blue_border.png"
+char = "res/assets/you.png"
+conf = "res/assets/you.yml"
 
 def test_sprite_init ():
     spt = mk.gfx.Sprite()
@@ -29,6 +31,13 @@ def test_sprite_get ():
     col = surf.get_at((0, 0))
     assert col == pg.Color(255, 255, 255)
 
+def test_sprite_sheet ():
+    spt = mk.gfx.Sprite()
+    spt.load_sheet(char, conf)
+
+def test_sprite_sheet_default_fp ():
+    spt = mk.gfx.Sprite()
+    spt.load_sheet(char)
 
 def test_screen_init ():
     scn = mk.gfx.Screen((320, 180))
@@ -61,14 +70,38 @@ def test_screen_upscale ():
 def test_gfx_integration_1 ():
     scn = mk.gfx.Screen((320, 180))
     disp = pg.display.set_mode((1280, 720))
-    spt_1 = mk.gfx.Sprite()
-    spt_2 = mk.gfx.Sprite()
-    spt_1.load_image(fp_w, "white", set_frame=True)
-    spt_2.load_image(fp_b, "blue", set_frame=True)
-    scn.register(spt_1, end=False)
-    scn.register(spt_2)
-    scn.draw()
-    scn.upscale(disp)
-    pg.display.flip()
+    bkgnd = mk.gfx.Sprite()
+    avatar = mk.gfx.Sprite()
+    bkgnd.load_image(fp_b, "blue", set_frame=True)
+    avatar.load_sheet(char)
+    avatar.set_frame('you_idle')
+    scn.register(bkgnd, end=False)
+    scn.register(avatar)
+    scn.clear_color = pg.Color(127, 127, 127)
+    x = 128
+    y = 0
+    dt = 0
+    running = True
+    clock = pg.time.Clock()
+    while running:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+
+        if pg.key.get_pressed()[pg.K_s]:
+            y += 1
+        if pg.key.get_just_pressed()[pg.K_s]:
+            avatar.queue_animation('you_walk_S', loop=True)
+        if pg.key.get_just_released()[pg.K_s]:
+            avatar.clear_animation()
+        avatar.pos = (x, y)
+
+        scn.draw()
+        scn.upscale(disp)
+        pg.display.flip()
+
+        dt = clock.tick(30)
+
+    pg.quit()
 
 
