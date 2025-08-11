@@ -1,0 +1,19 @@
+metadata:
+  name: lucy
+  width: 32
+  height: 32
+
+animations:
+  - id: idle
+    frames: 1
+    frame_time: 1
+    x_offsets: [0]
+    y_offsets: [0]
+  - id: hair
+    frames: 16
+    frame_time: 2
+    x_offsets: [  0,   0,   0,   0,   0,   0,  32,  64,
+                 96,  96,  96,  96, 128, 160, 192, 224]
+    y_offsets: [  0,   0,   0,   0,   0,   0,   0,   0,
+                  0,   0,   0,   0,   0,   0,   0,   0]
+
