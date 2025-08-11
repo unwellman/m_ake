@@ -5,6 +5,7 @@ fp_w = "res/programmer_assets/white_border.png"
 fp_b = "res/programmer_assets/blue_border.png"
 char = "res/assets/you.png"
 conf = "res/assets/you.yml"
+lucy_fp = "res/programmer_assets/lucy.png"
 
 def test_sprite_init ():
     spt = mk.gfx.Sprite()
@@ -73,13 +74,13 @@ def test_gfx_integration_1 ():
     bkgnd = mk.gfx.Sprite()
     avatar = mk.gfx.Sprite()
     bkgnd.load_image(fp_b, "blue", set_frame=True)
-    avatar.load_sheet(char)
-    avatar.set_frame('you_idle')
+    avatar.load_sheet(lucy_fp)
+    avatar.set_frame('lucy_idle')
     scn.register(bkgnd, end=False)
     scn.register(avatar)
-    scn.clear_color = pg.Color(127, 127, 127)
-    x = 128
-    y = 0
+    scn.clear_color = pg.Color(48, 48, 48)
+    x = 142
+    y = 74
     dt = 0
     running = True
     clock = pg.time.Clock()
@@ -88,12 +89,8 @@ def test_gfx_integration_1 ():
             if event.type == pg.QUIT:
                 running = False
 
-        if pg.key.get_pressed()[pg.K_s]:
-            y += 1
-        if pg.key.get_just_pressed()[pg.K_s]:
-            avatar.queue_animation('you_walk_S', loop=True)
-        if pg.key.get_just_released()[pg.K_s]:
-            avatar.clear_animation()
+        if pg.key.get_just_pressed()[pg.K_e]:
+            avatar.queue_animation('lucy_hair')
         avatar.pos = (x, y)
 
         scn.draw()
