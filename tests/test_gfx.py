@@ -4,7 +4,6 @@ import pygame as pg
 fp_w = "res/programmer_assets/white_border.png"
 fp_b = "res/programmer_assets/blue_border.png"
 char = "res/assets/you.png"
-conf = "res/assets/you.yml"
 lucy_fp = "res/programmer_assets/lucy.png"
 
 def test_sprite_init ():
@@ -34,11 +33,7 @@ def test_sprite_get ():
 
 def test_sprite_sheet ():
     spt = mk.gfx.Sprite()
-    spt.load_sheet(char, conf)
-
-def test_sprite_sheet_default_fp ():
-    spt = mk.gfx.Sprite()
-    spt.load_sheet(char)
+    spt.load_sheet(lucy_fp)
 
 def test_screen_init ():
     scn = mk.gfx.Screen((320, 180))
@@ -75,7 +70,7 @@ def test_gfx_integration_1 ():
     avatar = mk.gfx.Sprite()
     bkgnd.load_image(fp_b, "blue", set_frame=True)
     avatar.load_sheet(lucy_fp)
-    avatar.set_frame('lucy_idle')
+    avatar.set_frame("idle")
     scn.register(bkgnd, end=False)
     scn.register(avatar)
     scn.clear_color = pg.Color(48, 48, 48)
@@ -89,15 +84,18 @@ def test_gfx_integration_1 ():
             if event.type == pg.QUIT:
                 running = False
 
-        if pg.key.get_just_pressed()[pg.K_e]:
-            avatar.queue_animation('lucy_hair')
+        pressed = pg.key.get_just_pressed()
+        if pressed[pg.K_e]:
+            avatar.queue_animation("hair")
+        elif pressed[pg.K_b]:
+            avatar.queue_animation("idle", loop=True)
         avatar.pos = (x, y)
 
         scn.draw()
         scn.upscale(disp)
         pg.display.flip()
 
-        dt = clock.tick(30)
+        dt = clock.tick(24)
 
     pg.quit()
 

@@ -49,20 +49,21 @@ class Sprite (object):
         with open(fp_cfg) as cfg:
             config = yaml.load(cfg, Loader=yaml.Loader)
         surf = pg.image.load(fp_img)
-        w_h = (int(config['metadata']['width']), \
-               int(config['metadata']['height']))
-        name = config['metadata']['name']
-        for anim in config['animations']:
+        w_h = (int(config["metadata"]["width"]), \
+               int(config["metadata"]["height"]))
+        name = config["metadata"]["name"]
+        for anim in config["animations"]:
             self.__load_animation(name, anim, surf, w_h)
 
     def __load_animation (self, name, anim, surf, w_h):
-        anim_id = f"{name}_{anim['id']}"
+        anim_id = anim["id"]
         frames = []
-        for i in range(anim['frames']):
-            x = int(anim['x_offsets'][i])
-            y = int(anim['y_offsets'][i])
+        for i in range(anim["frames"]):
+            x = int(anim["x_offsets"][i])
+            y = int(anim["y_offsets"][i])
+            t = int(anim["f_times"][i])
             subsurf = surf.subsurface((x, y), w_h)
-            for j in range(anim['frame_time']):
+            for j in range(t):
                 # Enables animating on ones, twos, etc.
                 frames.append(subsurf)
         self.frames[anim_id] = frames

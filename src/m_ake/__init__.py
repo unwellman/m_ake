@@ -1,6 +1,6 @@
 import m_ake.config
 from m_ake import window
-from m_ake import event
+from m_ake.logic import event
 from m_ake import gfx
 
 CONFIG_FP = "res/config.txt"
