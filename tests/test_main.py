@@ -14,8 +14,8 @@ def test_integration_animation ():
     avatar = mk.gfx.Sprite()
     bkgnd.load_image(fp_b, "blue", set_frame=True)
     avatar.load_sheet(lucy_fp)
-    avatar.set_frame("idle")
-    avatar.queue_animation("idle", loop=True)
+    avatar.set_frame("idle_E")
+    avatar.queue_animation("idle_E", loop=True)
     scn.register(bkgnd, end=False)
     scn.register(avatar)
     scn.clear_color = pg.Color(48, 48, 48)
@@ -30,32 +30,32 @@ def test_integration_animation ():
             if event.type == pg.QUIT:
                 running = False
 
-        pressed = pg.key.get_just_pressed()
-        if pressed[pg.K_e]:
-            avatar.clear_animation()
-            avatar.queue_animation("hair")
-            avatar.queue_animation("idle", loop=True)
-        elif pressed[pg.K_d]:
-            avatar.clear_animation()
-            avatar.queue_animation("run", loop=True)
-        elif pressed[pg.K_a]:
-            avatar.clear_animation()
-            avatar.queue_animation("run_left", loop=True)
-
         held = pg.key.get_pressed()
         if held[pg.K_d]:
             x += 3
         if held[pg.K_a]:
             x -= 3
-        avatar.pos = (x, y)
+        avatar.pos = pg.Vector2(x, y)
 
         released = pg.key.get_just_released()
         if released[pg.K_d]:
             avatar.clear_animation()
-            avatar.queue_animation("idle", loop=True)
+            avatar.queue_animation("idle_E", loop=True)
         if released[pg.K_a]:
             avatar.clear_animation()
-            avatar.queue_animation("idle_left", loop=True)
+            avatar.queue_animation("idle_W", loop=True)
+
+        pressed = pg.key.get_just_pressed()
+        if pressed[pg.K_e]:
+            avatar.clear_animation()
+            avatar.queue_animation("hair")
+            avatar.queue_animation("idle_E", loop=True)
+        elif pressed[pg.K_d]:
+            avatar.clear_animation()
+            avatar.queue_animation("run_E", loop=True)
+        elif pressed[pg.K_a]:
+            avatar.clear_animation()
+            avatar.queue_animation("run_W", loop=True)
 
         scn.draw()
         scn.upscale(disp)
@@ -65,8 +65,6 @@ def test_integration_animation ():
         frame += 1
 
     pg.quit()
-
-    pass
 
 def test_main ():
     __main__.main()

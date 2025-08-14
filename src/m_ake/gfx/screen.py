@@ -8,6 +8,7 @@ class Screen (pg.Surface):
     """
     def __init__ (self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.pos = pg.Vector2(0, 0)
         self.factor = mk.config.pixel_factor
         self.__col = pg.Color(0, 0, 0, 255)
         self.sprites = deque()
@@ -45,7 +46,7 @@ class Screen (pg.Surface):
         """
         self.fill(self.__col)
         for spt in self.sprites:
-            args = spt.get_blit_args()
+            args = spt.get_blit_args(self.pos)
             self.blit(*args)
 
     def upscale (self, surf):

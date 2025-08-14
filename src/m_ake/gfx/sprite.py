@@ -11,14 +11,14 @@ class Sprite (object):
         frames: dict of {str: list of pygame.Surface}
         key: str to access frames
         frame: int to access animation frame
-        pos: (int, int): screen-space coordinates
+        pos: pygame.Vector2: screen-space coordinates
     """
     def __init__ (self):
         self.frames = {}
         self.queue = deque()
         self.loop = None
         self.default = (None, 0)
-        self.pos = (0, 0)
+        self.pos = pg.Vector2(0, 0)
 
     def load_image (self, fp, kw=None, set_frame=False):
         """
@@ -102,15 +102,15 @@ class Sprite (object):
         self.queue.clear()
         self.loop = None
 
-    def get_blit_args (self):
+    def get_blit_args (self, camera_pos=pg.Vector2(0, 0)):
         """
         Return args for a surface to call blit()
         """
         if self.queue:
-            return self.queue.popleft(), self.pos
+            return self.queue.popleft(), (self.pos - camera_pos)
         elif self.loop:
             self.queue_animation(self.loop, loop=True)
-            return self.queue.popleft(), self.pos
+            return self.queue.popleft(), (self.pos - camera_pos)
 
         kw, frame = self.default
         return self.frames[kw][frame], self.pos
