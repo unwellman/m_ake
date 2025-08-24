@@ -1,4 +1,5 @@
 fps = 60
-width = 1280
-height = 720
+tick = 20
+width = 320
+height = 180
 pixel_factor = 4
