@@ -18,11 +18,23 @@ class State_bool (object):
         return self.val
 
     def __call__ (self, val):
+        """
+        Returns a lambda that will update the bool to val when called.
+        This method does not change the state of the bool.
+        """
         return lambda dct: self.__set(val)
 
 class Event_handler (object):
-    def __init__ (self):
+    """
+    Event handler intended to be called once per frame. Configurable to only
+    eat certain types of pygame events.
+
+    Attributes:
+        types: pygame.event type (integer) or iterable of types
+    """
+    def __init__ (self, types=None):
         self.actions = {}
+        self.types = None
 
     def bind (self, event, func):
         """
@@ -39,7 +51,7 @@ class Event_handler (object):
         self.actions[event] = func
 
     def __call__ (self):
-        for event in pg.event.get():
+        for event in pg.event.get(eventtype=self.types):
             try:
                 self.actions[event.type](event.__dict__)
             except KeyError:

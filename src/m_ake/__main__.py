@@ -4,7 +4,7 @@ import m_ake as mk
 def main ():
     window = mk.window.Window()
 
-    handler = mk.event.Event_handler()
+    handler = mk.event.Event_handler(types=pg.QUIT)
     should_close = mk.event.State_bool(False)
     handler.bind(pg.QUIT, should_close(True))
 
@@ -16,6 +16,10 @@ def main ():
         window()
 
     pg.quit()
+
+def interrupt ():
+    print("Interrupt received")
+    pass
 
 if __name__ == "__main__":
     main()
