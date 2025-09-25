@@ -34,11 +34,13 @@ animations:
 parameters:
   - id: root
     switch: coll
-      - grounded: True
-      - inertial: False
+    children:
+      grounded: True
+      inertial: False
   - id: grounded
     switch: norm
-      - standing: [-0.785, 0.785]
+    children:
+      standing: [-0.785, 0.785]
   - id: standing
     switch: vel_x
   - id: inertial
