@@ -70,7 +70,7 @@ def test_gfx_integration_1 ():
     avatar = mk.gfx.Sprite()
     bkgnd.load_image(fp_b, "blue", set_frame=True)
     avatar.load_sheet(lucy_fp)
-    avatar.set_frame("idle")
+    avatar.set_frame("idle_E")
     scn.register(bkgnd, end=False)
     scn.register(avatar)
     scn.clear_color = pg.Color(48, 48, 48)
@@ -88,7 +88,7 @@ def test_gfx_integration_1 ():
         if pressed[pg.K_e]:
             avatar.queue_animation("hair")
         elif pressed[pg.K_b]:
-            avatar.queue_animation("idle", loop=True)
+            avatar.queue_animation("idle_E", loop=True)
         avatar.pos = (x, y)
 
         scn.draw()

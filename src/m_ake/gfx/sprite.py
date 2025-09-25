@@ -3,6 +3,22 @@ import os.path
 import yaml
 from collections import deque
 
+class Animation_parameters (object):
+    """
+    Object for holding parameters that determine animation states
+
+    Attributes:
+        vel: pg.Vector2 velocity
+        acc: pg.Vector2 acceleration (does not need to be the physics engine
+            acceleration---for example, freefall can be an inertial frame)
+        omega: float angular velocity
+        norm: float normal of surface sprite is locked to (should be relative
+            to the sprite---not in absolute world coordinates)
+        coll: bool True if the sprite is actually in contact with such a surface
+        face: bool if the sprite is reflected
+        override: {str, str} dict of control/logical animation overrides
+    """
+
 class Sprite (object):
     """
     Class for encapsulating 2-D sprites and their animations
@@ -19,6 +35,46 @@ class Sprite (object):
         self.loop = None
         self.default = (None, 0)
         self.pos = pg.Vector2(0, 0)
+        self.theta = 0.0
+
+    def update (self, dt, **kwargs):
+        """
+        Pass physics and input data to the sprite and prompt it to select
+        the next animation
+        """
+        self.pos = kwargs["pos"]
+        self.theta = kwargs["theta"]
+
+        if self.queue:
+            self.queue.popleft()
+        if not self.queue:
+            if self.loop:
+                self.queue_animation(self.loop, loop=True)
+            else:
+                kw, frame = self.default
+                self.queue.append(self.frames[kw][frame])
+
+    def get_blit_args (self, advance=True):
+        """
+        Return args for a surface to call blit()
+
+        Parameters:
+            camera_pos: offset for blit args (Should this even be passed here?)
+            advance: pops frame if True, does not interfere otherwise
+        """
+        surf = pg.transform.rotate(self.queue[0], self.theta)
+        offset = 1/2 * pg.Vector2(surf.get_width(), surf.get_height())
+        pos = self.pos - offset
+        return surf, pos
+
+    def get_hitbox (self):
+        """
+        Get the current collision state for this sprite as defined in the
+        """
+        if self.queue:
+            return self.queue[0], self.pos
+        kw, frame = self.default
+        return self.frames[kw][frame], self.pos
 
     def load_image (self, fp, kw=None, set_frame=False):
         """
@@ -36,6 +92,7 @@ class Sprite (object):
 
     def load_sheet (self, fp_img, fp_cfg=None):
         """
+        DEPRECATED
         Load a sprite sheet using a metadata file to generate animations
 
         Parameters:
@@ -54,6 +111,14 @@ class Sprite (object):
         name = config["metadata"]["name"]
         for anim in config["animations"]:
             self.__load_animation(name, anim, surf, w_h)
+
+    def load_config (self, fp):
+        """
+        Load a sprite sheet using a YAML config (spec elsewhere)
+
+        Parameters:
+            fp: path-like for the YAML config file
+        """
 
     def __load_animation (self, name, anim, surf, w_h):
         anim_id = anim["id"]
@@ -101,19 +166,5 @@ class Sprite (object):
         """
         self.queue.clear()
         self.loop = None
-
-    def get_blit_args (self, camera_pos=pg.Vector2(0, 0)):
-        """
-        Return args for a surface to call blit()
-        """
-        if self.queue:
-            return self.queue.popleft(), (self.pos - camera_pos)
-        elif self.loop:
-            self.queue_animation(self.loop, loop=True)
-            return self.queue.popleft(), (self.pos - camera_pos)
-
-        kw, frame = self.default
-        return self.frames[kw][frame], self.pos
-
 
 

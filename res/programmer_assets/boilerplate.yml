@@ -1,0 +1,45 @@
+metadata:
+  fp: lucy.png
+  name: boilerplate
+  width: 32
+  height: 32
+  group: D4
+
+animations:
+  - id: idle
+    frames: 4
+    f_times:   [ 16,   4,   8,   4]
+    x_offsets: [  0,  32,  64,  96]
+    y_offsets: [ 32,  32,  32,  32]
+  - id: run
+    frames: 8
+    f_times:   [  2,   2,   2,   2,   2,   2,   2,   2]
+    x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
+    y_offsets: [ 64,  64,  64,  64,  64,  64,  64,  64]
+  - id: jump
+    frames: 8
+    f_times:   [  2,   2,   2,   2,   2,   2,   2,   2]
+    x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
+    y_offsets: [ 96,  96,  96,  96,  96,  96,  96,  96]
+
+states: # To be honest, I have no idea what to do with this.
+# I'll need to write some examples first.
+  - conditions:
+      transformation: r0
+      collision: [S]
+      velocity: [0, 0]
+    animation: idle
+    type: loop
+  - conditions:
+      transformation: r0
+      collision: [S]
+      velocity: [1, 0]
+    animation: run
+    type: loop
+  - conditions:
+      transformation: r0
+      collision: []
+      velocity: [1, [-3, 4]]
+    animation: jump
+    type: map
+

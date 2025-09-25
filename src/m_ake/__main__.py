@@ -1,19 +1,29 @@
 import pygame as pg
 import m_ake as mk
 
+
 def main ():
+    pg.init()
     window = mk.window.Window()
+    clock = pg.time.Clock()
+    dt = 0
 
-    handler = mk.event.Event_handler(types=pg.QUIT)
-    should_close = mk.event.State_bool(False)
-    handler.bind(pg.QUIT, should_close(True))
+    main_events = [mk.state_change, pg.QUIT,
+                   pg.WINDOWRESIZED]
 
-    screen = mk.gfx.Screen((320, 180))
-    window.bind_screen(screen)
+    handler = mk.event.Event_handler(types=main_events)
+    running = mk.event.State_bool(True)
+    handler.bind(pg.QUIT, running(False))
 
-    while not should_close:
+    from m_ake.scripts.platform import Platform
+    entry_state = Platform()
+    entry_state.resume(window=window)
+
+    while running:
         handler()
+        entry_state.loop(dt)
         window()
+        dt = clock.tick(24) / 1000
 
     pg.quit()
 

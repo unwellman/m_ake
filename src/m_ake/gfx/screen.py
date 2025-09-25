@@ -46,8 +46,8 @@ class Screen (pg.Surface):
         """
         self.fill(self.__col)
         for spt in self.sprites:
-            args = spt.get_blit_args(self.pos)
-            self.blit(*args)
+            surf, pos = spt.get_blit_args()
+            self.blit(surf, pos - self.pos)
 
     def upscale (self, surf):
         """

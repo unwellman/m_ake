@@ -31,3 +31,14 @@ animations:
     x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
     y_offsets: [128, 128, 128, 128, 128, 128, 128, 128]
 
+parameters:
+  - id: root
+    switch: coll
+      - grounded: True
+      - inertial: False
+  - id: grounded
+    switch: norm
+      - standing: [-0.785, 0.785]
+  - id: standing
+    switch: vel_x
+  - id: inertial

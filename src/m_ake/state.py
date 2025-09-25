@@ -1,10 +1,59 @@
 import pygame as pg
 import m_ake as mk
 
-class State (type):
+import abc
+
+# Custom event for handling state changes
+state_change = pg.event.custom_type()
+
+
+class State (abc.ABC):
     """
-    Metaclass for game states
+    Abstract base class for game states
     """
-    def __call__ (cls, *args, **kwargs):
-        return super(State, cls).__call__(*args, **kwargs)
+    @abc.abstractmethod
+    def __init__ (self, *args, **kwargs):
+        """
+        Initialize the state, including required properties
+        """
+        pass
+
+    @abc.abstractmethod
+    def loop (self, dt):
+        """
+        Run this state's game loop, with dt s having passed since the last frame
+        """
+        pass
+
+    @abc.abstractmethod
+    def __str__ (self):
+        """
+        Each instance should have a unique identifier for hashing
+        """
+        pass
+
+    @abc.abstractmethod
+    def pause (self, *args, **kwargs):
+        """
+        Prepare to suspend the game state
+        """
+        pass
+
+    @abc.abstractmethod
+    def resume (self, *args, **kwargs):
+        """
+        Prepare to resume this game state
+        """
+        pass
+
+    @property
+    @abc.abstractmethod
+    def screen (self):
+        """
+        The screen object which this state will display to the main window.
+
+        Also used to draw the game under a pause menu
+        """
+        pass
+
 
