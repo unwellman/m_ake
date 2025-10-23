@@ -4,9 +4,23 @@ import pygame as pg
 class Pause (mk.State):
     pass
 
+def command (func):
+    """
+    Utility decorator for easily binding commands to keys
+
+    Instead of the command running when called, it returns a void
+    callable that runs the command, allowing the command to be delayed
+    or repeated.
+    """
+    def ret (*args, **kwargs):
+        def callback ():
+            func(*args, **kwargs)
+        return callback
+    return ret
+
 class Controller (mk.event.Event_handler):
     """
-    Absolute bare-minimum character controller simulator
+    Start with a typical platformer character controller
     """
     def __init__ (self):
         types = None
@@ -15,45 +29,67 @@ class Controller (mk.event.Event_handler):
         self.__acc = pg.Vector2(0, 0)
         self.__theta = 0.0
         self.__omega = 0.0
+        self.__face = False
+
+        self.run(False)()
+        self.move(pg.Vector2(0.0, 0.0))()
 
         f = 3.0
         self.__press = {
-            pg.K_w: self.accel(f*pg.Vector2( 0, -1), change=True),
-            pg.K_a: self.accel(f*pg.Vector2(-1,  0), change=True),
-            pg.K_s: self.accel(f*pg.Vector2( 0,  1), change=True),
-            pg.K_d: self.accel(f*pg.Vector2( 1,  0), change=True),
+            pg.K_a: self.move(pg.Vector2(-1.0, 0)),
+            pg.K_d: self.move(pg.Vector2(1.0, 0)),
+            pg.K_s: self.stop(),
             pg.K_RIGHT: self.rotate(f),
             pg.K_LEFT: self.rotate(-f),
+            pg.K_RSHIFT: self.stop(),
+            pg.K_LSHIFT: self.run(True),
         }
         self.__hold = {
-            pg.K_w: self.accel(f*pg.Vector2( 0, -1)),
-            pg.K_a: self.accel(f*pg.Vector2(-1,  0)),
-            pg.K_s: self.accel(f*pg.Vector2( 0,  1)),
-            pg.K_d: self.accel(f*pg.Vector2( 1,  0)),
+            pg.K_a: self.move(pg.Vector2(-1.0, 0)),
+            pg.K_d: self.move(pg.Vector2(1.0, 0)),
             pg.K_RIGHT: self.rotate(-f),
             pg.K_LEFT: self.rotate(f),
         }
         self.__release = {
-            
+            pg.K_LSHIFT: self.run(False),
+            pg.K_a: self.move(pg.Vector2(0.0, 0.0)),
+            pg.K_d: self.move(pg.Vector2(0.0, 0.0)),
         }
 
-    def accel (self, inc, change=False):
-        def func ():
-            self.__vel += inc
-            self.__accel = inc
-            if change:
-                self.__accel = pg.Vector2(0, 0)
-        return func
+    @command
+    def reposition (self, pos):
+        self.__pos = pos
 
+    @command
+    def move (self, inc):
+        self.__target = self.__speed * inc
+        if inc.x < 0:
+            self.__face = True
+        elif inc.x > 0:
+            self.__face = False
+
+    @command
+    def run (self, cond):
+        if cond:
+            self.__speed = 90
+            self.__k = 12
+        else:
+            self.__speed = 36
+            self.__k = 8
+
+    @command
     def rotate (self, inc):
-        def func ():
-            self.__omega += inc
-        return func
+        self.__omega += inc
 
+    @command
+    def stop (self):
+        self.__omega = 0.0
+        self.__vel = pg.Vector2(0, 0)
+        self.__theta = 0.0
+
+    @command
     def collide (self, direction):
-        def func ():
-            pass
-        return func
+        pass
 
     def poll (self):
         pressed = pg.key.get_just_pressed()
@@ -70,12 +106,16 @@ class Controller (mk.event.Event_handler):
                 v()
 
     def update (self, sprite, dt):
-        self.__pos += dt*self.__vel
-        self.__theta += dt*self.__omega
-        sprite.update(dt, pos=self.__pos, theta=self.__theta)
+        self.__acc = self.__k*(self.__target - self.__vel)
 
-    def inc_pos_callback (self, inc):
-        return lambda: self.__pos 
+        # Use an easy first-order correction to forward Euler
+        self.__vel += 0.5 * dt * self.__acc
+        self.__pos += dt * self.__vel
+        self.__vel += 0.5 * dt * self.__acc
+
+        self.__theta += dt * self.__omega
+        sprite.update(dt, pos=self.__pos, theta=self.__theta,
+                      face=self.__face, vel=self.__vel)
 
 class Platform (mk.State):
     instance = None # Singleton
@@ -94,18 +134,18 @@ class Platform (mk.State):
         if Platform.instance:
             return
         self.__screen = mk.gfx.Screen((480, 270))
-        lucy = mk.gfx.Sprite()
-        lucy.load_sheet("res/programmer_assets/lucy.png")
-        lucy.queue_animation("idle_E", loop=True)
-        self.lucy = lucy
-        self.screen.register(lucy)
+        miku = mk.gfx.Sprite()
+        miku.load_config("res/programmer_assets/migu.yml")
+        self.miku = miku
+        self.screen.register(miku)
         self.screen.clear_color = pg.Color(48, 48, 48)
 
         self.controller = Controller()
+        self.controller.reposition(pg.Vector2(240, 135))()
 
     def loop (self, dt):
         self.controller.poll()
-        self.controller.update(self.lucy, dt)
+        self.controller.update(self.miku, dt)
         self.screen.draw()
 
     def __str__ (self):

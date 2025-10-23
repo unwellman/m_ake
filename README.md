@@ -19,7 +19,7 @@ Joe: Writing
 
 Adam: Music
 
-Noah: Programming and music; management
+Noah: Programming and music
 
 Ethan: Programming
 

@@ -1,0 +1,47 @@
+metadata:
+  fp: migu.png
+  name: miku
+  width: 32
+  height: 32
+
+animations:
+  - id: idle
+    frames: 4
+    f_times:   [ 16,   4,   8,   4]
+    x_offsets: [  0,  32,  64,  96]
+    y_offsets: [  0,   0,   0,   0]
+  - id: walk
+    frames: 8
+    f_times:   [  3,   3,   3,   3,   3,   3,   3,   3]
+    x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
+    y_offsets: [ 32,  32,  32,  32,  32,  32,  32,  32]
+  - id: run
+    frames: 8
+    f_times:   [  2,   2,   2,   2,   2,   2,   2,   2]
+    x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
+    y_offsets: [ 64,  64,  64,  64,  64,  64,  64,  64]
+
+parameters: # Should we statically verify that this graph is acyclic?
+  - id: root
+    switch: coll
+    children:
+      grounded: True
+      inertial: False
+  - id: grounded
+    switch: norm
+    children:
+      standing: [-0.785, 0.785]
+      crawling: [-1.571, 1.571]
+  - id: standing
+    switch: vel_x
+    children:
+      idle: [-5, 5]
+      walk: [-40, 40]
+      run: [-80, 80]
+  - id: idle
+    animation: idle
+  - id: walk
+    animation: walk
+  - id: run
+    animation: run
+

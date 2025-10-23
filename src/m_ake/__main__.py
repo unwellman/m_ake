@@ -1,12 +1,16 @@
 import pygame as pg
 import m_ake as mk
 
+import sys
+import logging
+logging.basicConfig(stream=sys.stdout)
+
 
 def main ():
     pg.init()
-    window = mk.window.Window()
     clock = pg.time.Clock()
     dt = 0
+    window = mk.window.Window(clock=clock)
 
     main_events = [mk.state_change, pg.QUIT,
                    pg.WINDOWRESIZED]
@@ -23,7 +27,7 @@ def main ():
         handler()
         entry_state.loop(dt)
         window()
-        dt = clock.tick(24) / 1000
+        dt = clock.tick(60) / 1000
 
     pg.quit()
 

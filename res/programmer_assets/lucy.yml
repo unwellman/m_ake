@@ -31,7 +31,7 @@ animations:
     x_offsets: [  0,  32,  64,  96, 128, 160, 192, 224]
     y_offsets: [128, 128, 128, 128, 128, 128, 128, 128]
 
-parameters:
+parameters: # Should we statically determine that this graph is acyclic?
   - id: root
     switch: coll
     children:
@@ -41,6 +41,21 @@ parameters:
     switch: norm
     children:
       standing: [-0.785, 0.785]
+      crawling: []
   - id: standing
     switch: vel_x
+    children:
+      walking: [-1, 1]
+      running: [-2, 2]
+  - id: walking
+    switch: animation
+    children:
+      walk: walk
+
   - id: inertial
+    switch: animation
+    children: # example transitional animations go here
+      idle: idle
+  - id: idle # example leaf node
+    switch: frame # Special switch increments frame
+

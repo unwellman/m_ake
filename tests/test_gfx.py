@@ -5,6 +5,7 @@ fp_w = "res/programmer_assets/white_border.png"
 fp_b = "res/programmer_assets/blue_border.png"
 char = "res/assets/you.png"
 lucy_fp = "res/programmer_assets/lucy.png"
+migu_fp = "res/programmer_assets/migu.yml"
 
 def test_sprite_init ():
     spt = mk.gfx.Sprite()
@@ -31,9 +32,9 @@ def test_sprite_get ():
     col = surf.get_at((0, 0))
     assert col == pg.Color(255, 255, 255)
 
-def test_sprite_sheet ():
+def test_sprite_conf ():
     spt = mk.gfx.Sprite()
-    spt.load_sheet(lucy_fp)
+    spt.load_config(lucy_fp)
 
 def test_screen_init ():
     scn = mk.gfx.Screen((320, 180))
@@ -62,41 +63,5 @@ def test_screen_upscale ():
     scn = mk.gfx.Screen((320, 180))
     scn.draw()
     scn.upscale(disp)
-
-def test_gfx_integration_1 ():
-    scn = mk.gfx.Screen((320, 180))
-    disp = pg.display.set_mode((1280, 720))
-    bkgnd = mk.gfx.Sprite()
-    avatar = mk.gfx.Sprite()
-    bkgnd.load_image(fp_b, "blue", set_frame=True)
-    avatar.load_sheet(lucy_fp)
-    avatar.set_frame("idle_E")
-    scn.register(bkgnd, end=False)
-    scn.register(avatar)
-    scn.clear_color = pg.Color(48, 48, 48)
-    x = 142
-    y = 74
-    dt = 0
-    running = True
-    clock = pg.time.Clock()
-    while running:
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
-                running = False
-
-        pressed = pg.key.get_just_pressed()
-        if pressed[pg.K_e]:
-            avatar.queue_animation("hair")
-        elif pressed[pg.K_b]:
-            avatar.queue_animation("idle_E", loop=True)
-        avatar.pos = (x, y)
-
-        scn.draw()
-        scn.upscale(disp)
-        pg.display.flip()
-
-        dt = clock.tick(24)
-
-    pg.quit()
 
 
