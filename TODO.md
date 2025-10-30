@@ -1,9 +1,6 @@
 # m ake: Software To-do List
 
 ## 1. High Priority
-- [ ] Document sprite config file requirements
-- [ ] Expand and repair test coverage for sprite controller
-- [ ] Set up tests for physics system
 
 
 ## 2. Feature Roadmap

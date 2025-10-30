@@ -1,2 +1,2 @@
-from m_ake.logic.physics import Physics
+from m_ake.logic.controller import Platformer_controller
 
