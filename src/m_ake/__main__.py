@@ -4,9 +4,12 @@ import m_ake as mk
 import sys
 import logging
 logging.basicConfig(stream=sys.stdout)
+logger = logging.getLogger("m_ake")
+logger.setLevel("DEBUG")
 
 
 def main ():
+    mk.init(__file__)
     pg.init()
     clock = pg.time.Clock()
     dt = 0

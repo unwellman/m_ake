@@ -5,6 +5,7 @@ dependencies = [
 	"pygame-ce",
 	"pytest",
 	"PyYAML",
+	"pyinstaller"
 ]
 
 [build-system]

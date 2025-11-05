@@ -1,6 +1,7 @@
 # m ake: Software To-do List
 
 ## 1. High Priority
+- [ ] Build system and distribution (before the project gets too large!!)
 
 
 ## 2. Feature Roadmap
@@ -14,6 +15,7 @@
 - [ ] Sound loading and playback
 - [ ] UI system (ideally at native resolution)
     - [ ] Handling for different display resolutions
+    - [ ] Title screen and state loader
 - [ ] Standard for custom PyGame events
 
 

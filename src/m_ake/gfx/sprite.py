@@ -1,4 +1,5 @@
 import pygame as pg
+import m_ake as mk
 import yaml
 import os.path
 from enum import Enum
@@ -265,7 +266,7 @@ class Sprite (object):
             config = yaml.load(cfg, Loader=yaml.Loader)
         basename = config["metadata"]["fp"]
         dirname = os.path.split(fp)[0]
-        img_fp = os.path.join(dirname, basename)
+        img_fp = mk.get_path(os.path.join(dirname, basename))
         surf = pg.image.load(img_fp)
         w_h = (int(config["metadata"]["width"]), \
                int(config["metadata"]["height"]))

@@ -22,7 +22,8 @@ class Platform (mk.State):
             return
         self.__screen = mk.gfx.Screen((480, 270))
         miku = mk.gfx.Sprite()
-        miku.load_config("res/programmer_assets/migu.yml")
+        miku_fp = mk.get_path("res/programmer_assets/migu.yml")
+        miku.load_config(miku_fp)
         self.miku = miku
         self.screen.register(miku)
         self.screen.clear_color = pg.Color(48, 48, 48)
@@ -42,7 +43,7 @@ class Platform (mk.State):
         pass
 
     def resume (self, *args, **kwargs):
-        kwargs['window'].bind_screen(self.__screen)
+        kwargs["window"].bind_screen(self.__screen)
 
     @property
     def screen (self):

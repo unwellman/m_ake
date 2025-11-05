@@ -1,3 +1,6 @@
+# PyInstaller artifacts
+build
+dist
 
 # Just in case
 .venv
