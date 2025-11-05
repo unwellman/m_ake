@@ -5,10 +5,13 @@ class Window:
     def __init__ (self, *args, **kwargs):
         f = mk.config.pixel_factor
         self.params = {
+            "title": "m ake",
             "size": (f*mk.config.width, f*mk.config.height),
-            "flags": pg.FULLSCREEN,
+            "position": pg.WINDOWPOS_CENTERED,
+            "resizable": True,
         }
-        self.surface = pg.display.set_mode(**self.params)
+        self.window = pg.Window(**self.params)
+        self.surface = self.window.get_surface()
         self.screen = None
         try:
             self.clock = kwargs["clock"]
@@ -19,8 +22,8 @@ class Window:
     def fps_counter (self):
         if not self.clock:
             return
-        fps = f"{self.clock.get_fps():.2f}"
-        surf = self.font.render(fps, 1, pg.Color("WHITE"))
+        text = f"{self.clock.get_fps():.2f}"
+        surf = self.font.render(text, 1, pg.Color("WHITE"))
         self.surface.blit(surf, (0, 0))
 
     def bind_screen (self, screen):
@@ -30,5 +33,5 @@ class Window:
         self.surface.fill("black")
         self.screen.upscale(self.surface)
         self.fps_counter()
-        pg.display.flip()
+        self.window.flip()
 
