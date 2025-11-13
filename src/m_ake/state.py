@@ -19,16 +19,17 @@ class State (abc.ABC):
         pass
 
     @abc.abstractmethod
-    def loop (self, dt):
+    def __repr__ (self):
         """
-        Run this state's game loop, with dt s having passed since the last frame
+        Each instance should have a unique identifier for hashing
+        Changed from __str__ to be more idiomatic
         """
         pass
 
     @abc.abstractmethod
-    def __str__ (self):
+    def loop (self, dt):
         """
-        Each instance should have a unique identifier for hashing
+        Run this state's game loop, with dt s having passed since the last frame
         """
         pass
 

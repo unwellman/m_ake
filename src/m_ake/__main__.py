@@ -22,8 +22,8 @@ def main ():
     running = mk.event.State_bool(True)
     handler.bind(pg.QUIT, running(False))
 
-    from m_ake.scripts.platform import Platform
-    entry_state = Platform()
+    from m_ake.scripts.ring_station import Station
+    entry_state = Station()
     entry_state.resume(window=window)
 
     while running:

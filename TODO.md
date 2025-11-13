@@ -1,7 +1,7 @@
 # m ake: Software To-do List
 
 ## 1. High Priority
-- [ ] Build system and distribution (before the project gets too large!!)
+- [x] Build system and distribution (before the project gets too large!!)
 
 
 ## 2. Feature Roadmap

@@ -45,3 +45,6 @@ parameters: # Should we statically verify that this graph is acyclic?
   - id: run
     animation: run
 
+  - id: inertial
+    animation: idle
+

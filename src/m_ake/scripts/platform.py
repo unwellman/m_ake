@@ -29,14 +29,13 @@ class Platform (mk.State):
         self.screen.clear_color = pg.Color(48, 48, 48)
 
         self.controller = mk.logic.Platformer_controller()
-        self.controller.reposition(pg.Vector2(240, 135))()
 
     def loop (self, dt):
         self.controller.poll()
         self.controller.update(self.miku, dt)
         self.screen.draw()
 
-    def __str__ (self):
+    def __repr__ (self):
         return "platformer"
 
     def pause (self, *args, **kwargs):

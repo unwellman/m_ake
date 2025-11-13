@@ -22,7 +22,9 @@ class State_bool (object):
         Returns a lambda that will update the bool to val when called.
         This method does not change the state of the bool.
         """
-        return lambda dct: self.__set(val)
+        def ret (dct=None):
+            self.__set(val)
+        return ret
 
 class Event_handler (object):
     """
