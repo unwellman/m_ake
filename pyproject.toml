@@ -2,11 +2,13 @@
 name = "m_ake"
 version = "0.0.0"
 dependencies = [
+	"jax",
+	"pyinstaller",
 	"pygame-ce",
+	"pygame-gui",
 	"pytest",
 	"PyYAML",
-	"pyinstaller",
-	"pygame-gui",
+	"quadax",
 ]
 
 [build-system]
