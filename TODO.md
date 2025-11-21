@@ -1,26 +1,33 @@
 # m ake: Software To-do List
 
 ## 1. High Priority
-- [x] Build system and distribution (before the project gets too large!!)
+- [ ] ???
 
 
 ## 2. Feature Roadmap
-- [ ] "Smart" sprite system
-    - [ ] Custom animation data & handling
-    - [ ] Emitting signals for other systems
-    - [x] Basic groundwork
-- [ ] Physics system
-    - [ ] Collision detection and (configurable) handling
-    - [ ] Actors update sprites
-- [ ] Sound loading and playback
 - [ ] UI system (ideally at native resolution)
     - [ ] Handling for different display resolutions
     - [ ] Title screen and state loader
 - [ ] Standard for custom PyGame events
+- [ ] World file format (YAML) and loading
+    - [ ] Instantiating sprites
+    - [ ] Loading sprite materials from assets
+    - [ ] Instantiating physical actors & collision
+    - [ ] Fine-grained world object primitives for speed
+    - [x] Discretizing parametric curves
+- [ ] New sprite types
+    - [ ] Refactor Sprite interface & inheritance
 
 
 ## 3. Minor Goals
 - [ ] Synchronize forward leg with walk/run animations
-- [ ] Mockup of 2-D inertial character controller
 - [ ] Refactor sprite system into distinct 
+- [ ] Configurable collision handling
+- [ ] "Smart" animation system
+    - [ ] Custom animation data & handling
+    - [ ] Emitting signals for other systems
+- [ ] Sound loading and playback
+- [x] Using NumPy, implement substitutes for functions from large libraries
+    - [x] `jax.grad`
+    - [x] `scipy.cumulative_simpson`
 

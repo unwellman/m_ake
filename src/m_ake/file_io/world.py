@@ -1,11 +1,24 @@
-import jax
-import jax.numpy as jnp
-from quadax import cumulative_simpson
+import numpy as np
 import yaml
 
 import m_ake as mk
 import logging
 logger = logging.getLogger("m_ake")
+
+def cumulative_simpson (y, x):
+    """
+    Numpy-only implementation. y and x must be 1-dimensional and have the
+    same dimensions. x must have evenly spaced samples for correct results.
+    """
+    n, = y.shape
+    res = np.zeros((n//2))
+    dx = x[1] - x[0] # Pinky promise?
+    res[0] = 0.0
+    res[1] = 1/3 * dx * (y[0] + y[1])
+    for i in np.arange(2, n//2):
+        res[i] = 1/3 * dx * (y[0] + y[i]
+            + 4*np.sum(y[1:i-1:2]) + 2*np.sum(y[2:i-2:2]))
+    return res
 
 class World_importer (object):
     """
@@ -39,7 +52,7 @@ class World_importer (object):
             raise NotImplemented()
     
     @classmethod
-    def spline (cls, dct):
+    def parametric (cls, dct):
         """
         Take a dictionary of parameters for a parametric curve, then return
         a jnp.array of equal-arc length samples
@@ -51,21 +64,21 @@ class World_importer (object):
         data = dct["data"]
         x = lambda t: eval(data["x"])
         y = lambda t: eval(data["y"])
-        n = data["arc_sample"]
+        n = 2*data["arc_sample"] # ensure even for Simpson's rule
         rng = data["parameter"]
         mi, ma = min(rng), max(rng)
         if data["cycle"]:
-            t = jnp.linspace(mi, ma, num=n, endpoint=False)
-            t = jnp.append(t, mi)
+            t = np.linspace(mi, ma, num=n, endpoint=False)
+            t = np.append(t, mi)
         else:
-            t = jnp.linspace(mi, ma, num=n+1, endpoint=True)
-        x_t = jax.vmap(jax.grad(x))
-        x_t = x_t(t)
-        y_t = jax.vmap(jax.grad(y))
-        y_t = y_t(t)
+            t = np.linspace(mi, ma, num=n+1, endpoint=True)
+        x = x(t)
+        y = y(t)
+        x_t = np.gradient(x, t)
+        y_t = np.gradient(y, t)
 
-        s_t = jnp.sqrt(x_t**2 + y_t**2)
-        s = cumulative_simpson(s_t, dx=(ma - mi)/n)
+        s_t = np.sqrt(x_t**2 + y_t**2)
+        s = cumulative_simpson(s_t, t)
         sample_length = data["scale"]
         logger.debug(f"World spline {dct["id"]} sampling {sample_length}")
 
@@ -85,7 +98,7 @@ class World_importer (object):
         idx.append(len(s))
         ret = [[], []]
         for i in idx:
-            ret[0].append(x(t[i]))
-            ret[1].append(y(t[i]))
+            ret[0].append(x[2*i])
+            ret[1].append(y[2*i])
 
-        return jnp.asarray(ret)
+        return np.asarray(ret)
