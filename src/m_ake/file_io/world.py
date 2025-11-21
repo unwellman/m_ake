@@ -9,6 +9,8 @@ def cumulative_simpson (y, x):
     """
     Numpy-only implementation. y and x must be 1-dimensional and have the
     same dimensions. x must have evenly spaced samples for correct results.
+
+    Note that the return shape has half the entries of y.
     """
     n, = y.shape
     res = np.zeros((n//2))
@@ -86,6 +88,7 @@ class World_importer (object):
         over = False
         i = 1
         while s[idx[-1]] + sample_length < s[-1]:
+            # Condition ensures stop roughly 1 sample length before the end
             j = idx[-1]
             while s[j] < i*sample_length:
                 j += 1
@@ -95,10 +98,13 @@ class World_importer (object):
             over = not over
             idx.append(j)
             i += 1
-        idx.append(len(s))
         ret = [[], []]
         for i in idx:
+            # Multiply indices by 2 because the integrator returns 1/2 size
             ret[0].append(x[2*i])
             ret[1].append(y[2*i])
+        # Ensure that the last point is included
+        ret[0].append(x[-1])
+        ret[1].append(y[-1])
 
         return np.asarray(ret)
