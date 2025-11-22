@@ -14,20 +14,16 @@
     - [ ] Loading sprite materials from assets
     - [ ] Instantiating physical actors & collision
     - [ ] Fine-grained world object primitives for speed
-    - [x] Discretizing parametric curves
 - [ ] New sprite types
     - [ ] Refactor Sprite interface & inheritance
 
 
 ## 3. Minor Goals
 - [ ] Synchronize forward leg with walk/run animations
-- [ ] Refactor sprite system into distinct 
+- [ ] Refactor sprite system
 - [ ] Configurable collision handling
 - [ ] "Smart" animation system
     - [ ] Custom animation data & handling
     - [ ] Emitting signals for other systems
 - [ ] Sound loading and playback
-- [x] Using NumPy, implement substitutes for functions from large libraries
-    - [x] `jax.grad`
-    - [x] `scipy.cumulative_simpson`
 

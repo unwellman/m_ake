@@ -5,6 +5,10 @@ from abc import ABC, abstractmethod
 class Sprite (ABC):
     """
     Base class for things drawn to the screen
+
+    Attributes:
+        pos (pg.Vector2): position in world coordinates
+        theta (float): Angular position relative to world x-axis
     """
     def __init__ (self, **kwargs):
         try:
@@ -17,7 +21,7 @@ class Sprite (ABC):
             self.theta = 0.0
 
     @abstractmethod
-    def get_blit_args (self):
+    def get_blit_args (self, camera):
         """
         Return at least a surface and position to be passed to
         pg.Surface.blit()
@@ -31,8 +35,8 @@ class Drawable (pg.Surface, Sprite):
         pg.Surface.__init__(self, size, flags=pg.SRCALPHA)
         Sprite.__init__(self, **kwargs)
 
-    def get_blit_args (self, camera_theta = 0.0):
-        surf = pg.transform.rotate(self, camera_theta - self.theta)
+    def get_blit_args (self, camera):
+        surf = pg.transform.rotate(self, camera.theta - self.theta)
         return surf, self.pos
 
 class Static (Sprite):
@@ -41,11 +45,11 @@ class Static (Sprite):
     """
     def load_image (self, fp, kw=None, set_frame=False):
         """
-        Load an image and map it to a keyword (default is same as fp)
+        Load an image and map a keyword to it
 
         Parameters:
             fp: file-like object for pygame.image
-            kw: hashable key for the image data
+            kw: hashable key for the image data (defaults to filepath)
         """
         if kw is None:
             kw = fp

@@ -29,9 +29,19 @@ class Station_sprite (mk.gfx.sprite.Drawable):
         pg.draw.circle(self, pg.Color(255, 0, 255),
                 center + point.rotate(300), 2, width=0)
 
-    def get_blit_args (self, camera_theta = 0.0):
-        self.draw(camera_theta - self.theta)
-        return self, self.pos
+    def get_blit_args (self, camera):
+        self.draw(camera.theta - self.theta)
+        a = camera.radius
+
+        left_top = camera.pos.rotate(-camera.theta) \
+            + (self.rad + 2 - a, self.rad + 2 - a)
+        rect = pg.FRect(left_top, (2*a, 2*a))
+        center_0 = pg.Vector2(rect.center)
+        rect = rect.clip(self.get_rect())
+        center_1 = pg.Vector2(rect.center)
+        offset = (center_1 - center_0).rotate(camera.theta)
+        ret = self.subsurface(rect)
+        return ret, camera.pos + offset
 
 class Station (mk.State):
     instance = None # Singleton
@@ -57,11 +67,11 @@ class Station (mk.State):
         self.screen.register(miku)
 
         rad = 2000
-        acc = 96
+        acc = 80
         self.station = Station_sprite(rad)
         self.screen.register(self.station)
         self.screen.clear_color = pg.Color(24, 24, 24)
-        self.camera = Camera(self.miku)
+        self.camera = Camera_controller(self.miku)
 
         params = {
             "radius": rad,
@@ -121,7 +131,7 @@ override = pg.event.custom_type()
 
 from enum import Enum
 
-class Camera (mk.logic.actor.Actor):
+class Camera_controller (mk.logic.actor.Actor):
     """
     Trying different ways of operating the camera
     """
@@ -134,12 +144,10 @@ class Camera (mk.logic.actor.Actor):
         self.k = 0.80
 
     def update (self, screen, dt, rotate_camera=True):
-        self.pos += self.k * (self.actor.pos - self.pos)
-        self.theta = self.actor.theta
-
-        screen.pos = self.pos
         if rotate_camera:
-            screen.theta = self.theta
+            screen.reposition(self.actor.pos, self.actor.theta)
+        else:
+            screen.reposition(self.actor.pos)
 
     def collision (self, other):
         return False

@@ -4,6 +4,12 @@ from collections import deque
 import logging
 logger = logging.getLogger("m_ake")
 
+class Camera (object):
+    def __init__ (self, radius, pos=pg.Vector2(0, 0), theta=0.0):
+        self.radius = radius
+        self.pos = pos
+        self.theta = theta
+
 class Screen (pg.Surface):
     """
     Object for preparing data for rendering to the screen
@@ -11,8 +17,7 @@ class Screen (pg.Surface):
     def __init__ (self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.offset = pg.Vector2(self.get_size())/2
-        self.pos = pg.Vector2(0, 0)
-        self.theta = 0.0
+        self.camera = Camera(self.offset.magnitude())
         self.factor = mk.config.pixel_factor
         self.__col = pg.Color(0, 0, 0, 255)
         self.sprites = deque()
@@ -30,8 +35,8 @@ class Screen (pg.Surface):
         Discontinuously reposition the camera. Intended for use by a 
         physics module with better control (for now).
         """
-        self.pos = pg.Vector2(pos)
-        self.theta = theta
+        self.camera.pos = pg.Vector2(pos)
+        self.camera.theta = theta
 
     def register (self, spt, end=True):
         """
@@ -57,13 +62,16 @@ class Screen (pg.Surface):
         Draw registered sprites in their order in the deque
         """
         self.fill(self.__col)
+        blits = []
         for spt in self.sprites:
-            surf, pos = spt.get_blit_args(self.theta)
-            pos = pos - self.pos
-            pos = pos.rotate(-self.theta)
+            surf, pos = spt.get_blit_args(self.camera)
+            surf = pg.transform.flip(surf, False, True)
+            pos = pos - self.camera.pos
+            pos = pos.rotate(-self.camera.theta)
             pos.y = -pos.y
-            pos -= 1/2 * pg.Vector2(surf.get_width(), surf.get_height())
-            self.blit(pg.transform.flip(surf, False, True), pos + self.offset)
+            pos = pos - 1/2 * pg.Vector2(surf.size) + self.offset
+            blits.append((surf, pos))
+        self.blits(blits, doreturn=0)
 
     def upscale (self, surf):
         """

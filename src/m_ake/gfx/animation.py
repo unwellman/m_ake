@@ -225,14 +225,14 @@ class Animated (Sprite):
             surf = pg.transform.flip(surf, True, False)
         self.next = surf
 
-    def get_blit_args (self, camera_theta=0.0):
+    def get_blit_args (self, camera):
         """
         Return args for a surface to call blit()
 
         Parameters:
             camera_theta: angle of view
         """
-        surf = pg.transform.rotate(self.next, camera_theta - self.theta)
+        surf = pg.transform.rotate(self.next, camera.theta - self.theta)
         return surf, self.pos
 
     def load_config (self, fp):
