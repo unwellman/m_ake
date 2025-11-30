@@ -16,6 +16,7 @@
     - [ ] Fine-grained world object primitives for speed
 - [ ] New sprite types
     - [ ] Refactor Sprite interface & inheritance
+- [ ] Browser distribution with [Pygbag](https://github.com/pygame-web/pygbag)
 
 
 ## 3. Minor Goals

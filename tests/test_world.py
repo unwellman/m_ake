@@ -1,6 +1,7 @@
 import pytest
 import m_ake as mk
 from m_ake.file_io import world
+from m_ake.logic import shapes
 import yaml
 import numpy as np
 
@@ -46,6 +47,18 @@ def test_parametric_circle ():
     assert points[:, 0] == pytest.approx(np.array([32, 0]))
     assert points[:, -1] == pytest.approx(np.array([32, 0]))
 
+def test_parametric_collision ():
+    dct = yaml.load(circle, Loader=yaml.Loader)
+    points = world.World_importer.parametric(dct)
+    shp = shapes.Parametric(points)
+    # Dummy actor
+    import pygame as pg
+    class A:
+        pos = pg.Vector2(28, 0)
+        radius = 8
+    coll = shp.collision(A())
+    assert len(coll[0]) >= 1
+
 def test_materials ():
     pass
 
@@ -54,4 +67,8 @@ def test_geometry ():
 
 def test_world_import ():
     pass
+
+def profile_collision_1 ():
+    pass
+
 

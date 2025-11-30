@@ -1,3 +1,4 @@
+import pygame as pg
 import numpy as np
 import yaml
 
@@ -22,6 +23,38 @@ def cumulative_simpson (y, x):
             + 4*np.sum(y[1:i-1:2]) + 2*np.sum(y[2:i-2:2]))
     return res
 
+class Material (object):
+    """
+    The visible part of world materials
+    """
+    def __init__ (self, data, texture, rotations=72):
+        """
+        Parameters:
+            data (dict): dictionary loaded from a YAML specification
+            texture: a pg.Surface to take textures from
+        """
+        self.name = data["id"] # Note that this should be unique!
+        self.scale = data["scale"]
+        rect = pg.Rect(data["offset"], data["size"])
+        self.original = texture.subsurface(rect)
+        self.load_rotations(self.original, rotations)
+        self.round = rotations / 360
+        self.rotations = rotations
+
+    def load_rotations (self, surf, rotations):
+        self.positions = []
+        angles = np.linspace(0, 360, num=rotations, endpoint=False)
+        for theta in angles:
+            rot = pg.transform.rotate(surf, theta)
+            self.positions.append(rot)
+
+    def __call__ (self, theta):
+        """
+        Return a surface representing the material at the given rotation
+        """
+        idx = np.rint(theta*self.round) % self.rotations
+        return self.positions[idx]
+
 class World_importer (object):
     """
     Many functions used for world geometry and file storage
@@ -34,24 +67,32 @@ class World_importer (object):
         """
         with open(fp) as stream:
             world = yaml.load(stream, Loader=yaml.Loader)
+        basename = world["metadata"]["material_fp"]
+        dirname = os.path.split(fp)[0]
+        img_fp = mk.get_path(os.path.join(dirname, basename))
+        surf = pg.image.load(img_fp)
 
-        self.geometry = []
+        self.init_materials(world["materials"], surf)
+        self.init_geometry(world["geometry"])
 
-    def init_materials (self, world):
+    def init_materials (self, data, surf):
         """
         Load and store materials
         """
+        self.materials = {}
+        for material in data:
+            mat = Material(material, surf)
+            self.materials[material["id"]] = mat
 
-    def init_geometry (self, world):
+    def init_geometry (self, data):
         """
         Computation for splines, generating colliders, etc.
         """
         initializers = {
-            "parametric": self.spline,
+            "parametric": self.parametric,
         }
-        for dct in world["geometry"]:
+        for dct in data:
             initializer = initializers[dct["shape"]]
-            raise NotImplemented()
     
     @classmethod
     def parametric (cls, dct):
@@ -81,7 +122,7 @@ class World_importer (object):
 
         s_t = np.sqrt(x_t**2 + y_t**2)
         s = cumulative_simpson(s_t, t)
-        sample_length = data["scale"]
+        sample_length = s[-1] / np.round(s[-1] / data["scale"])
         logger.debug(f"World spline {dct["id"]} sampling {sample_length}")
 
         idx = [0]
@@ -103,7 +144,13 @@ class World_importer (object):
             # Multiply indices by 2 because the integrator returns 1/2 size
             ret[0].append(x[2*i])
             ret[1].append(y[2*i])
-        # Ensure that the last point is included
+
+        # Remove a penultimate point that is too close to the end
+        if (ret[0][-1]-x[-1])**2 + (ret[1][-1]-y[-1])**2 <= sample_length/2:
+            ret[0].pop(-1)
+            ret[1].pop(-1)
+
+        # Ensure that the end or cycle point is included
         ret[0].append(x[-1])
         ret[1].append(y[-1])
 

@@ -1,9 +1,58 @@
 import pygame as pg
+import numpy as np
 import m_ake as mk
-from m_ake.logic.actor import Walkable
+from m_ake.logic.actor import Walkable, Actor
 import math
 import logging
 logger = logging.getLogger("m_ake")
+
+class Parametric (Actor):
+    def __init__ (self, points, **kwargs):
+        """
+        Initialize superclass and some methods
+
+        Note that points are in local coordinates
+        """
+        super().__init__(**kwargs)
+        self.points = points
+        self.precompute()
+
+    def precompute (self):
+        _, n = self.points.shape
+        radii = []
+        mats = []
+        for i in range(n - 1):
+            vec = self.points[:,i+1] - self.points[:,i]
+            radii.append(np.linalg.norm(vec))
+            mat = [[ self.points[1,i] - self.points[1,i+1],
+                     self.points[0,i+1] - self.points[0,i] ],
+                   [ self.points[0,i] - self.points[0,i+1],
+                     self.points[1,i] - self.points[1,i+1] ]]
+            mats.append(mat)
+
+        self.radii = np.asarray(radii)
+        self.mats = np.asarray(mat)
+
+    def collision (self, other):
+        return self.__collision_circle(other)
+        
+    def __collision_circle (self, other):
+        _, n = self.points.shape
+        pts = self.points.swapaxes(0, 1).reshape((n, 2, 1))[0:n-1, :, :]
+        diff = self.pos - other.pos
+        # Move curve point-wise into relative coordinates
+        pts += np.array([[diff.x], [diff.y]])
+        sol = self.mats @ pts
+        sol = sol.reshape((n-1, 2)).swapaxes(0, 1)
+        sol /= np.square(self.radii)
+        sol = np.square(sol)
+        orthogonal = sol[0]
+        parallel = sol[1]
+        norms = (other.radius / self.radii) ** 2
+        coll = np.logical_and(np.less_equal(parallel, 1),
+                              np.less_equal(orthogonal, norms))
+        return np.nonzero(coll)
+
 
 class Circle_Path (Walkable):
     def __init__ (self, radius, **kwargs):
