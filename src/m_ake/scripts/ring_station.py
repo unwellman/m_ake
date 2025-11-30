@@ -41,7 +41,7 @@ class Station_sprite (mk.gfx.sprite.Drawable):
         center_1 = pg.Vector2(rect.center)
         offset = (center_1 - center_0).rotate(camera.theta)
         ret = self.subsurface(rect)
-        return ret, camera.pos + offset
+        return [(ret, camera.pos + offset)]
 
 class Station (mk.State):
     instance = None # Singleton

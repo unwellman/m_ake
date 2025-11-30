@@ -7,6 +7,7 @@ logger = logging.getLogger("m_ake")
 class Camera (object):
     def __init__ (self, radius, pos=pg.Vector2(0, 0), theta=0.0):
         self.radius = radius
+        self.radius_sq = radius**2
         self.pos = pos
         self.theta = theta
 
@@ -64,14 +65,17 @@ class Screen (pg.Surface):
         self.fill(self.__col)
         blits = []
         for spt in self.sprites:
-            surf, pos = spt.get_blit_args(self.camera)
-            surf = pg.transform.flip(surf, False, True)
-            pos = pos - self.camera.pos
-            pos = pos.rotate(-self.camera.theta)
-            pos.y = -pos.y
-            pos = pos - 1/2 * pg.Vector2(surf.size) + self.offset
-            blits.append((surf, pos))
+            for surf, pos in spt.get_blit_args(self.camera):
+                blits.append(self.transform(surf, pos))
         self.blits(blits, doreturn=0)
+
+    def transform (self, surf, pos):
+        surf = pg.transform.flip(surf, False, True)
+        pos = pos - self.camera.pos
+        pos = pos.rotate(-self.camera.theta)
+        pos.y = -pos.y
+        pos = pos - 1/2 * pg.Vector2(surf.size) + self.offset
+        return surf, pos
 
     def upscale (self, surf):
         """

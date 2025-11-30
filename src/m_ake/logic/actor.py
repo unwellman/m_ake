@@ -29,9 +29,13 @@ class Actor (ABC):
         for key, val in kwargs.items():
             if key in keys:
                 self.__dict__[key] = val
+        self.sprites = []
 
     def __repr__ (self):
         return name
+
+    def register (self, sprite, offset):
+        self.sprites.append((sprite, offset))
 
     @abstractmethod
     def collision (self, other):

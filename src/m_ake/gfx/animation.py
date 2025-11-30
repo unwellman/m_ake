@@ -233,7 +233,7 @@ class Animated (Sprite):
             camera_theta: angle of view
         """
         surf = pg.transform.rotate(self.next, camera.theta - self.theta)
-        return surf, self.pos
+        return [(surf, self.pos)]
 
     def load_config (self, fp):
         """
