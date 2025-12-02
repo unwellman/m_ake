@@ -1,6 +1,8 @@
 import m_ake as mk
 import m_ake.logic.event as event
+import m_ake.logic.actor as actor
 import pygame as pg
+from enum import Enum
 
 def command (func):
     """
@@ -16,101 +18,182 @@ def command (func):
         return callback
     return ret
 
-class Platformer_controller (event.Event_handler):
+class Camera_controller (actor.Actor):
     """
-    Start with a typical platformer character controller
+    Trying different ways of operating the camera
     """
-    def __init__ (self):
-        types = None
-        self.__pos = pg.Vector2(0, 0)
-        self.__vel = pg.Vector2(0, 0)
-        self.__acc = pg.Vector2(0, 0)
-        self.__theta = 0.0
-        self.__omega = 0.0
-        self.__face = False
+    def __init__ (self, actor, **kwargs):
+        """
+        actor: the actor that the camera should track
+        """
+        super().__init__(**kwargs)
+        self.actor = actor
+        self.k = 0.80
 
+    def update (self, screen, dt, rotate_camera=True):
+        if rotate_camera:
+            screen.reposition(self.actor.pos, self.actor.theta)
+        else:
+            screen.reposition(self.actor.pos)
+
+    def collision (self, other):
+        return False
+
+class Space_controller (actor.Actor):
+    """
+    Controller for sidescrolling zero-G environments
+    """
+    States = Enum("States", [
+        ("INERTIAL", 0),
+        ("GROUNDED", 1),
+    ])
+    def __init__ (self):
+        params = {
+            "name": "Miku",
+            "pos": pg.Vector2(0, 0),
+            "vel": pg.Vector2(0, -60),
+            "theta": 0.0,
+            "omega": 0.0,
+        }
+        self.radius = 16
+        super().__init__(**params)
+        self.face = False
+        self.__norm = -90.0
+
+        self.timeout = 0
+        self.switch_state(None)()
         self.run(False)()
-        self.move(pg.Vector2(0.0, 0.0))()
+        self.target_vel = pg.Vector2(0, 0)
+        self.offset = 0.0
+        self.k = 0.5
 
         f = 3.0
         self.__press = {
-            pg.K_a: self.move(pg.Vector2(-1.0, 0)),
-            pg.K_d: self.move(pg.Vector2(1.0, 0)),
-            pg.K_s: self.stop(),
-            pg.K_RIGHT: self.rotate(f),
-            pg.K_LEFT: self.rotate(-f),
-            pg.K_RSHIFT: self.stop(),
-            pg.K_LSHIFT: self.run(True),
+        self.States.INERTIAL: {
+            },
+        self.States.GROUNDED: {
+            pg.K_a: self.walk(pg.Vector2(-1.0, 0.0)),
+            pg.K_d: self.walk(pg.Vector2(1.0, 0.0)),
+            pg.K_SPACE: self.jump(pg.Vector2(0, 120)),
+            },
         }
         self.__hold = {
-            pg.K_a: self.move(pg.Vector2(-1.0, 0)),
-            pg.K_d: self.move(pg.Vector2(1.0, 0)),
-            pg.K_RIGHT: self.rotate(-f),
-            pg.K_LEFT: self.rotate(f),
+        self.States.INERTIAL: {
+            },
+        self.States.GROUNDED: {
+            pg.K_LSHIFT: self.run(True),
+            pg.K_a: self.walk(pg.Vector2(-1.0, 0.0)),
+            pg.K_d: self.walk(pg.Vector2(1.0, 0.0)),
+            },
         }
         self.__release = {
+        self.States.INERTIAL: {
+            },
+        self.States.GROUNDED: {
             pg.K_LSHIFT: self.run(False),
-            pg.K_a: self.move(pg.Vector2(0.0, 0.0)),
-            pg.K_d: self.move(pg.Vector2(0.0, 0.0)),
+            pg.K_a: self.walk(pg.Vector2(0.0, 0.0)),
+            pg.K_d: self.walk(pg.Vector2(0.0, 0.0)),
+            },
         }
+
+    def bind_press (self, key, action):
+        self.__press[self.States.GROUNDED][key] = action
+        self.__press[self.States.INERTIAL][key] = action
+    
+    @property
+    def norm (self):
+        return self.__norm
+
+    @norm.setter
+    def norm (self, val):
+        self.__norm = val
+        self.theta = val + 90
+
+    @command
+    def switch_state (self, path=None):
+        if self.timeout > 0:
+            return
+        if path is not None:
+            self.state = self.States.GROUNDED
+            path.set_zero(self)
+            self.vel = pg.Vector2(0, 0)
+            self.offset = 0.0
+            self.walk(pg.Vector2(0.0, 0.0))()
+            self.run(False)()
+        else:
+            self.state = self.States.INERTIAL
+            self.timeout = 1
+        self.path = path
 
     @command
     def reposition (self, pos):
-        self.__pos = pos
-
-    @command
-    def move (self, inc):
-        self.__target = self.__speed * inc
-        if inc.x < 0:
-            self.__face = True
-        elif inc.x > 0:
-            self.__face = False
+        self.pos = pos
 
     @command
     def run (self, cond):
         if cond:
-            self.__speed = 90
-            self.__k = 12
+            self.speed = 90
         else:
-            self.__speed = 36
-            self.__k = 8
+            self.speed = 36
 
     @command
-    def rotate (self, inc):
-        self.__omega += inc
+    def walk (self, val):
+        if self.state == self.States.GROUNDED:
+            self.target_vel = self.speed * val
+            if self.target_vel.x < 0:
+                self.face = True
+            if self.target_vel.x > 0:
+                self.face = False
 
     @command
-    def stop (self):
-        self.__omega = 0.0
-        self.__vel = pg.Vector2(0, 0)
-        self.__theta = 0.0
+    def jump (self, imp):
+        if self.state == self.States.GROUNDED:
+            self.omega = self.path.omega
+            imp = imp.rotate(self.theta)
+            tangent = self.path.get_tangent(self)
+            vel = self.vel.rotate(self.theta)
+            self.vel = vel + imp + tangent
+            self.path.detach(self)
+            self.switch_state()()
 
-    @command
-    def collide (self, direction):
-        pass
+    def collision (self, other):
+        return False
 
     def poll (self):
+        self.timeout -= 1
         pressed = pg.key.get_just_pressed()
-        for k, v in self.__press.items():
+        for k, v in self.__press[self.state].items():
             if pressed[k]:
                 v()
         held = pg.key.get_pressed()
-        for k, v in self.__hold.items():
+        for k, v in self.__hold[self.state].items():
             if held[k]:
                 v()
         released = pg.key.get_just_released()
-        for k, v in self.__release.items():
+        for k, v in self.__release[self.state].items():
             if released[k]:
                 v()
 
     def update (self, sprite, dt):
-        self.__acc = self.__k*(self.__target - self.__vel)
+        if self.state == self.States.INERTIAL:
+            self.__update_inertial(sprite, dt)
+        else:
+            self.__update_grounded(sprite, dt)
 
-        # Use an easy first-order correction to forward Euler
-        self.__vel += 0.5 * dt * self.__acc
-        self.__pos += dt * self.__vel
-        self.__vel += 0.5 * dt * self.__acc
+    def __update_inertial (self, sprite, dt):
+        self.pos += dt * self.vel
+        self.theta += dt * self.omega
+        sprite.update(dt, pos=self.pos, theta=self.theta,
+                      face=self.face, coll=False)
 
-        self.__theta += dt * self.__omega
-        sprite.update(dt, pos=self.__pos, theta=self.__theta,
-                      face=self.__face, vel=self.__vel)
+    def __update_grounded (self, sprite, dt):
+        vel_inc = self.k * (self.target_vel - self.vel)
+        self.vel += 0.5*vel_inc
+        self.offset += dt * self.vel.x
+        self.vel += 0.5*vel_inc
+
+        self.path.move(self, self.offset)
+        sprite.update(dt, pos=self.pos, theta=self.theta,
+                      face=self.face, vel=self.vel, coll=True)
+
+

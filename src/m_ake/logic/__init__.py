@@ -1,5 +1,4 @@
-from m_ake.logic.controller import Platformer_controller
-from m_ake.logic.controller import command
+from m_ake.logic.controller import command, Camera_controller, Space_controller
 
 from m_ake.logic import actor
 from m_ake.logic import controller

@@ -34,7 +34,7 @@ class Actor (ABC):
     def __repr__ (self):
         return name
 
-    def register (self, sprite, offset):
+    def register (self, sprite, offset=pg.Vector2(0, 0)):
         self.sprites.append((sprite, offset))
 
     @abstractmethod
