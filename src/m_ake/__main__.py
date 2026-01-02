@@ -23,7 +23,8 @@ def main ():
     handler.bind(pg.QUIT, running(False))
 
     from m_ake.scripts.ring_station import Station
-    entry_state = Station()
+    from m_ake.scripts.worlds import Miku_world
+    entry_state = Miku_world()
     entry_state.resume(window=window)
 
     while running:

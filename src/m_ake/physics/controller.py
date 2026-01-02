@@ -1,8 +1,11 @@
 import m_ake as mk
 import m_ake.logic.event as event
-import m_ake.logic.actor as actor
+from m_ake.physics import Actor, Walkable
 import pygame as pg
 from enum import Enum
+
+import logging
+logger = logging.getLogger("m_ake")
 
 def command (func):
     """
@@ -18,7 +21,7 @@ def command (func):
         return callback
     return ret
 
-class Camera_controller (actor.Actor):
+class Camera_controller (Actor):
     """
     Trying different ways of operating the camera
     """
@@ -36,10 +39,8 @@ class Camera_controller (actor.Actor):
         else:
             screen.reposition(self.actor.pos)
 
-    def collision (self, other):
-        return False
 
-class Space_controller (actor.Actor):
+class Space_controller (Actor):
     """
     Controller for sidescrolling zero-G environments
     """
@@ -47,16 +48,24 @@ class Space_controller (actor.Actor):
         ("INERTIAL", 0),
         ("GROUNDED", 1),
     ])
-    def __init__ (self):
+    def __init__ (self, radius=16, **kwargs):
         params = {
             "name": "Miku",
             "pos": pg.Vector2(0, 0),
-            "vel": pg.Vector2(0, -60),
+            "vel": pg.Vector2(0, 0),
             "theta": 0.0,
             "omega": 0.0,
         }
-        self.radius = 16
+        for kw in params.keys():
+            try:
+                params[kw] = kwargs[kw]
+            except KeyError:
+                pass
+        self.radius = radius
         super().__init__(**params)
+        # Sanitize vectors
+        self.pos = pg.Vector2(self.pos)
+        self.vel = pg.Vector2(self.vel)
         self.face = False
         self.__norm = -90.0
 
@@ -64,8 +73,9 @@ class Space_controller (actor.Actor):
         self.switch_state(None)()
         self.run(False)()
         self.target_vel = pg.Vector2(0, 0)
-        self.offset = 0.0
         self.k = 0.5
+
+        self.collider = mk.physics.collision.Circle_collider(self, radius)
 
         f = 3.0
         self.__press = {
@@ -115,14 +125,16 @@ class Space_controller (actor.Actor):
             return
         if path is not None:
             self.state = self.States.GROUNDED
-            path.set_zero(self)
             self.vel = pg.Vector2(0, 0)
-            self.offset = 0.0
             self.walk(pg.Vector2(0.0, 0.0))()
             self.run(False)()
+            if self.manager is not None:
+                self.manager.ignore(self, path)
         else:
             self.state = self.States.INERTIAL
             self.timeout = 1
+            if self.manager is not None:
+                self.manager.check(self, self.path)
         self.path = path
 
     @command
@@ -156,9 +168,6 @@ class Space_controller (actor.Actor):
             self.path.detach(self)
             self.switch_state()()
 
-    def collision (self, other):
-        return False
-
     def poll (self):
         self.timeout -= 1
         pressed = pg.key.get_just_pressed()
@@ -174,26 +183,27 @@ class Space_controller (actor.Actor):
             if released[k]:
                 v()
 
-    def update (self, sprite, dt):
+    def update (self, dt):
         if self.state == self.States.INERTIAL:
-            self.__update_inertial(sprite, dt)
+            self.__update_inertial(dt)
         else:
-            self.__update_grounded(sprite, dt)
+            self.__update_grounded(dt)
 
-    def __update_inertial (self, sprite, dt):
+    def __update_inertial (self, dt):
         self.pos += dt * self.vel
         self.theta += dt * self.omega
-        sprite.update(dt, pos=self.pos, theta=self.theta,
-                      face=self.face, coll=False)
+        for sprite, offset in self.sprites:
+            sprite.update(dt, pos=self.pos+offset, theta=self.theta,
+                          face=self.face, coll=False)
 
-    def __update_grounded (self, sprite, dt):
+    def __update_grounded (self, dt):
         vel_inc = self.k * (self.target_vel - self.vel)
         self.vel += 0.5*vel_inc
-        self.offset += dt * self.vel.x
         self.vel += 0.5*vel_inc
 
-        self.path.move(self, self.offset)
-        sprite.update(dt, pos=self.pos, theta=self.theta,
-                      face=self.face, vel=self.vel, coll=True)
+        self.path.move(self, dt * self.vel.x)
+        for sprite, offset in self.sprites:
+            sprite.update(dt, pos=self.pos+offset, theta=self.theta,
+                          face=self.face, vel=self.vel, coll=True)
 
 

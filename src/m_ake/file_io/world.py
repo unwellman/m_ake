@@ -1,6 +1,7 @@
 import pygame as pg
 import numpy as np
 import yaml
+import os
 
 import m_ake as mk
 import logging
@@ -52,7 +53,7 @@ class Material (object):
         """
         Return a surface representing the material at the given rotation
         """
-        idx = np.rint(theta*self.round) % self.rotations
+        idx = int(np.rint(-theta*self.round)) % self.rotations
         return self.positions[idx]
 
 class World_importer (object):
@@ -65,15 +66,30 @@ class World_importer (object):
             world_fp: location of YAML world description, returned from
                 mk.get_path
         """
-        with open(fp) as stream:
+        self.fp = world_fp
+        with open(self.fp) as stream:
             world = yaml.load(stream, Loader=yaml.Loader)
-        basename = world["metadata"]["material_fp"]
-        dirname = os.path.split(fp)[0]
-        img_fp = mk.get_path(os.path.join(dirname, basename))
-        surf = pg.image.load(img_fp)
 
+        basename = world["metadata"]["material_fp"]
+        surf = pg.image.load(self.get_relative_path(basename))
         self.init_materials(world["materials"], surf)
         self.init_geometry(world["geometry"])
+        self.init_player(world["player"])
+
+    def get_relative_path (self, basename):
+        dirname = os.path.split(self.fp)[0]
+        return mk.get_path(os.path.join(dirname, basename))
+
+    def init_player (self, data):
+        self.player = mk.gfx.Animated()
+        config = self.get_relative_path(data["fp"])
+        self.player.load_config(config)
+
+        code = f"{data['controller']}"
+        actor_cls = eval(code)
+        assert issubclass(actor_cls, mk.physics.Actor)
+        self.controller = actor_cls(**data)
+        self.controller.register(self.player)
 
     def init_materials (self, data, surf):
         """
@@ -89,28 +105,55 @@ class World_importer (object):
         Computation for splines, generating colliders, etc.
         """
         initializers = {
-            "parametric": self.parametric,
+            "parametric": self.init_parametric,
         }
+        self.geometry = {}
         for dct in data:
-            initializer = initializers[dct["shape"]]
+            actor, sprite = initializers[dct["shape"]](dct)
+            actor.register(sprite)
+            self.geometry[dct["id"]] = (actor, sprite)
+
+    def init_parametric (self, dct):
+        data = dct["data"]
+        code_x = data.pop("x")
+        code_y = data.pop("y")
+        x = lambda t: eval(code_x)
+        y = lambda t: eval(code_y)
+        points = self.sample_arc_points(x, y, **data)
+        loop = dct["data"]["cycle"]
+        params = {
+            "pos": pg.Vector2(dct["origin"]),
+            "loop": loop,
+        }
+        try:
+            if dct["walkable"]:
+                actor = mk.physics.shapes.Parametric_path(points, **params)
+            else:
+                actor = mk.physics.shapes.Parametric(points, **params)
+        except KeyError:
+            actor = mk.physics.shapes.Parametric(points, **params)
+        material = self.materials[dct["material"]]
+        from m_ake.gfx.world_sprites import Parametric
+        sprite = Parametric(material, points)
+        return actor, sprite
     
     @classmethod
-    def parametric (cls, dct):
+    def sample_arc_points (cls, x, y, *, parameter=[0, 1], scale=16,
+                           arc_sample=1000, cycle=False, **kwargs):
         """
         Take a dictionary of parameters for a parametric curve, then return
-        a jnp.array of equal-arc length samples
+        a np.array of equal-arc length samples
 
         Parameters:
-            dct: Dict from world description file
-            arc_sample: Number of arc length samples per line segment.
+            x: callable returning x value given a parameter t
+            y: callable returning y value given a parameter t
+            parameter: start and end values of the parameter
+            scale: target size of samples
+            arc_sample: Initial number of arc length samples per line segment.
         """
-        data = dct["data"]
-        x = lambda t: eval(data["x"])
-        y = lambda t: eval(data["y"])
-        n = 2*data["arc_sample"] # ensure even for Simpson's rule
-        rng = data["parameter"]
-        mi, ma = min(rng), max(rng)
-        if data["cycle"]:
+        n = 2*arc_sample # double samples for Simpson's rule
+        mi, ma = min(parameter), max(parameter)
+        if cycle:
             t = np.linspace(mi, ma, num=n, endpoint=False)
             t = np.append(t, mi)
         else:
@@ -122,8 +165,7 @@ class World_importer (object):
 
         s_t = np.sqrt(x_t**2 + y_t**2)
         s = cumulative_simpson(s_t, t)
-        sample_length = s[-1] / np.round(s[-1] / data["scale"])
-        logger.debug(f"World spline {dct["id"]} sampling {sample_length}")
+        sample_length = s[-1] / np.round(s[-1] / scale)/2
 
         idx = [0]
         over = False
@@ -145,7 +187,7 @@ class World_importer (object):
             ret[0].append(x[2*i])
             ret[1].append(y[2*i])
 
-        # Remove a penultimate point that is too close to the end
+        # Remove the penultimate point if it is too close to the end
         if (ret[0][-1]-x[-1])**2 + (ret[1][-1]-y[-1])**2 <= sample_length/2:
             ret[0].pop(-1)
             ret[1].pop(-1)

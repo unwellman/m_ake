@@ -8,8 +8,28 @@ class Camera (object):
     def __init__ (self, radius, pos=pg.Vector2(0, 0), theta=0.0):
         self.radius = radius
         self.radius_sq = radius**2
-        self.pos = pos
-        self.theta = theta
+        self.__pos = pos
+        self.__theta = theta
+
+    @property
+    def pos (self):
+        return self.__pos
+
+    @pos.setter
+    def pos (self, pos):
+        self.__pos = pos
+    
+    @property
+    def theta (self):
+        return self.__theta
+
+    @theta.setter
+    def theta (self, target):
+        if -5 <= target - self.__theta <= 5:
+            self.__theta = target
+        else:
+            distance = (target - self.__theta + 180) % 360 - 180
+            self.__theta += 0.1 * distance
 
 class Screen (pg.Surface):
     """
@@ -66,7 +86,8 @@ class Screen (pg.Surface):
         blits = []
         for spt in self.sprites:
             for surf, pos in spt.get_blit_args(self.camera):
-                blits.append(self.transform(surf, pos))
+                s, p = self.transform(surf, pos)
+                blits.append((s, p))
         self.blits(blits, doreturn=0)
 
     def transform (self, surf, pos):

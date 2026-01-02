@@ -84,6 +84,8 @@ class Station (mk.State):
         self.path = mk.logic.shapes.Circle_Path(**params)
         self.controller = mk.logic.Space_controller()
         self.controller.pos = pg.Vector2(0, -rad*0.9)
+        self.controller.vel = pg.Vector2(0, -60)
+        self.controller.register(self.miku)
         self.rotate_camera = mk.logic.event.State_bool(True)
         self.controller.bind_press(pg.K_RSHIFT, self.rotate_camera(False))
         self.controller.bind_press(pg.K_RETURN, self.rotate_camera(True))
@@ -95,7 +97,7 @@ class Station (mk.State):
         self.controller.poll()
 
         self.path.update(self.station, dt)
-        self.controller.update(self.miku, dt)
+        self.controller.update(dt)
         self.camera.update(self.screen, dt, self.rotate_camera)
         self.screen.draw()
 

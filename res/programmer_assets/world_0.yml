@@ -1,6 +1,12 @@
 metadata:
   material_fp: materials.png
 
+player:
+  fp: migu.yml
+  controller: mk.physics.Space_controller
+  pos: [0, -3900]
+  vel: [0, -30]
+
 materials:
   - id: white
     scale: 16
@@ -16,10 +22,11 @@ geometry:
     shape: parametric
     material: girder
     origin: [0, 0]
+    walkable: True
     data:
-      x: 32*np.cos(np.pi*t)
-      y: 32*np.sin(np.pi*t)
+      x: 4000*np.cos(np.pi*t)
+      y: 4000*np.sin(np.pi*t)
       parameter: [0, 2]
       scale: 16
-      arc_sample: 1000
+      arc_sample: 20000
       cycle: True

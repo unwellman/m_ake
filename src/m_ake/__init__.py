@@ -1,4 +1,5 @@
 import m_ake.config
+import m_ake.physics as physics
 from m_ake import window
 from m_ake.logic import event
 from m_ake import gfx

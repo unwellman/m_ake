@@ -2,6 +2,9 @@ import m_ake as mk
 import pygame as pg
 import numpy as np
 
+import logging
+logger = logging.getLogger("m_ake")
+
 class Parametric (mk.gfx.sprite.Sprite):
     def __init__ (self, material, points, **kwargs):
         """
@@ -15,12 +18,16 @@ class Parametric (mk.gfx.sprite.Sprite):
         self.get_centers_angles()
 
     def get_blit_args (self, camera):
+        marker = pg.Surface((10, 10))
+        pg.draw.circle(marker, pg.Color(255, 255, 255), (5, 5), 5)
+        pos = pg.Vector2(self.centers[0]).rotate(self.theta) + self.pos
+        yield marker, pos
         for i in range(len(self.centers)):
             point = pg.Vector2(self.centers[i])
             cond = (camera.radius + self.material.scale)**2
             if (point + self.pos - camera.pos).magnitude_squared() > cond:
                 continue
-            theta = self.angles[i]
+            theta = self.angles[i] - camera.theta
             surf = self.material(theta)
             pos = point.rotate(self.theta) + self.pos
             yield surf, pos

@@ -5,6 +5,9 @@ from abc import ABC
 from abc import ABCMeta
 from abc import abstractmethod
 
+import logging
+logger = logging.getLogger("m_ake")
+
 class Actor (ABC):
     """
     Base class for in-game physical actors.
@@ -17,13 +20,18 @@ class Actor (ABC):
         float omega: angular velocity in degrees/sec
     """
     defaults = {
-        "name": None,
+        "name": "actor",
         "pos": pg.Vector2(0, 0),
         "vel": pg.Vector2(0, 0),
         "theta": 0.0,
         "omega": 0.0,
     }
     def __init__ (self, **kwargs):
+        try:
+            self.__collider
+        except AttributeError:
+            self.__collider = None
+        self.__manager = None
         self.__dict__.update(Actor.defaults)
         keys = Actor.defaults.keys()
         for key, val in kwargs.items():
@@ -32,17 +40,40 @@ class Actor (ABC):
         self.sprites = []
 
     def __repr__ (self):
-        return name
+        return self.name
 
     def register (self, sprite, offset=pg.Vector2(0, 0)):
         self.sprites.append((sprite, offset))
 
-    @abstractmethod
+    @property
+    def manager (self):
+        """
+        The Physics instance which updates this actor
+        """
+        return self.__manager
+
+    @manager.setter
+    def manager (self, manager):
+        self.__manager = manager
+
+    @property
+    def collider (self):
+        if self.__collider is None:
+            raise AttributeError(f"{self} does not have a collider")
+        return self.__collider
+
+    @collider.setter
+    def collider (self, collider):
+        self.__collider = collider
+
     def collision (self, other):
         """
-        Return True (or truthy object) if self and object are colliding
-        Return False (or falsy object) if self and object are not colliding
         """
+        a = self.__collider
+        b = other._Actor__collider
+        if (a is None) or (b is None):
+            return False
+        return a.check(b)
 
 class Walkable (Actor, metaclass=ABCMeta):
     """
